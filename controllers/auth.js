@@ -86,17 +86,24 @@ exports.addToList = async (req,res)=>{
       message: "please enter a valid anime name"
     });
   }
-
-  user.watchList.push(anime._id);
-  await user.save();
-  try{    
-    res.status(200).json({
-      message: "added successfully"
-    });
-  }catch(err){
-    res.status(500).json({
-      message: "internal error"
-    });
+  const exist = Object.values(user.watchList).find(test=>{
+    return String(anime._id).localeCompare(test) == 0
+  });
+  if (exist == undefined){
+    user.watchList.push(anime._id);
+    await user.save();
+    try{    
+      res.status(200).json({
+        message: "added successfully"
+      });
+    }catch(err){
+      res.status(500).json({
+        message: "internal error"
+      });
+    }
+  }
+  else{
+    res.send("already exists");
   }
 }
 
