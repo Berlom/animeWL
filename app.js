@@ -11,6 +11,18 @@ const animeRoute = require('./routes/anime');
 const categoryRoute = require('./routes/category');
 const studioRoute = require('./routes/studio');
 
+const multer = require('multer');
+const fileStorage = multer.diskStorage({
+    destination:(req,file,cb)=>{
+        cb(null,'images')
+    },
+    filename:(req,file,cb)=>{
+        cb(null, file.originalname)
+    }
+});
+const upload = multer({storage: fileStorage});
+
+
 mongoose.connect(process.env.DB_CONNECT,
 { 
     useNewUrlParser: true,
@@ -23,7 +35,7 @@ mongoose.connect(process.env.DB_CONNECT,
 // app.use(express.json()); 
 app.use(bodyParser.json({ type: 'application/json' }));
 app.use(bodyParser.urlencoded({ extended: false }));
-
+app.use(upload.single('image'));
 
 app.use('/auth',authRoutes);
 app.use('/anime',animeRoute);

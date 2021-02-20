@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { validationResult } = require('express-validator/check');
+const fs = require('fs');
 
 const Anime = require('../models/anime');
 const Category = require('../models/category');
@@ -10,6 +11,20 @@ const Studio = require('../models/studio');
 exports.getAnimes = async (req,res)=>{
     try{
         const anime = await Anime.find().populate('category').populate('studio');
+        res.json(anime);
+    }catch(err){
+        res.status(500).json({
+            error: err
+        });
+    }
+}
+
+/************************ GETTING A SPECIFIC ANIME ***********************/
+exports.getAnime = async (req,res)=>{
+    try{
+        const anime = await Anime.findOne({
+            slug: req.params.slug
+        }).populate('category').populate('studio');
         res.json(anime);
     }catch(err){
         res.status(500).json({
@@ -78,6 +93,11 @@ exports.editAnime = async (req,res)=>{
                 message: "this anime already exists"
             });
         }
+    }
+    
+    if(req.file){
+        fs.unlinkSync(anime.image);
+        anime.image = req.file.path;
     }
 
     const oldCategory = anime.category;
@@ -191,15 +211,22 @@ exports.addAnime = async (req,res)=>{
         });
     }
 
+    if(!req.file){
+        res.status(422).json({
+            message: 'no image given'
+        });
+    }
+
     const anime = new Anime({
         name: req.body.name,
         episodes: req.body.episodes,
         category: categories,
         aired: new Date(req.body.aired),
         description: req.body.description,
-        studio: studio
-    });
-      
+        studio: studio,
+        image: req.file.path
+    });      
+    
     await anime.save();
     try{
         categories.forEach(async (element)=>{
@@ -238,7 +265,9 @@ exports.deleteAnime = async (req,res)=>{
             message: "this anime does not exist"
         });
     }
-    
+
+    fs.unlinkSync(anime.image);
+
     await Anime.findOneAndDelete({
         slug: req.params.slug
     }); 

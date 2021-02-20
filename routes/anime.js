@@ -7,6 +7,7 @@ const animeController = require('../controllers/anime');
 
 router.post('/add',token,admin, animeController.addAnime);
 router.get('/',token,animeController.getAnimes);
+router.get('/:slug',token,animeController.getAnime);
 router.put('/edit/:slug',token,admin,animeController.editAnime);
 router.delete('/delete/:slug',token,admin,animeController.deleteAnime);
 

@@ -4,7 +4,14 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/user');
 const Anime = require('../models/anime');
-const user = require('../models/user');
+const nodemailer = require('nodemailer');
+const sendgridTransport = require('nodemailer-sendgrid-transport');
+
+const transporter = nodemailer.createTransport(sendgridTransport({
+  auth:{
+    api_key: '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'
+  }
+}));
 
 /************************ LOGGING IN ***********************/
 exports.login =  async (req, res)=>{
@@ -61,7 +68,13 @@ exports.register = async (req, res)=>{
 
     return user.save();
       }).then(result=>{
-      res.status(200).json({user: result._id});
+        res.status(200).json({user: result._id});
+        // return transporter.sendMail({
+        //   to: user.email,
+        //   from: 'berlom@solutions.tn',
+        //   subject:'my miserable life',
+        //   text:'your life sucks dude get a real one'
+        // });
     }).catch(err=>{
       res.status(500).json({
         error : err
