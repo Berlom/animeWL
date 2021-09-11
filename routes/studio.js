@@ -5,8 +5,9 @@ const admin = require('./verifyAdmin');
 const { body } = require('express-validator/check');
 const studioController = require('../controllers/studio');
 
-router.post('/add',token,admin, studioController.addStudio);
+router.post('/add',token,admin, studioController.addAllStudios);
 router.get('/',token,studioController.getStudios);
+router.get('/:limit',token,studioController.getLimitedStudios);
 router.get('/:slug',token,studioController.getAnimePerStudio);
 router.put('/edit/:slug',token,admin,studioController.editStudio);
 router.delete('/delete/:slug',token,admin,studioController.deleteCategory);

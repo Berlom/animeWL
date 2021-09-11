@@ -10,6 +10,7 @@ router.post('/add',token,admin,
     body('name').trim().isAlpha().withMessage('the name must be alphabetic')
 ],
 categoryController.addCategory);
+router.get('/:limit',token,categoryController.getLimitedCategories)
 router.get('/',token,categoryController.getCategories);
 router.get('/:slug',token,categoryController.getCategory);
 router.delete('/delete/:slug',token,admin,categoryController.deleteCategory);

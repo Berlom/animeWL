@@ -17,10 +17,10 @@ const animeSchema = new Schema({
         type: Schema.Types.ObjectId,
         ref: "category"
     }],
-    studio:{
+    studio:[{
         type: Schema.Types.ObjectId,
         ref: "Studio"
-    },
+    }],
     description:{
         type: String
     },
@@ -33,6 +33,14 @@ const animeSchema = new Schema({
         required: true
     },
     image:{
+        type: String,
+        required: false
+    },
+    trailer:{
+        type: String,
+        required: false
+    },
+    type:{
         type: String,
         required: true
     }

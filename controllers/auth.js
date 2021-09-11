@@ -4,34 +4,30 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/user');
 const Anime = require('../models/anime');
-const nodemailer = require('nodemailer');
-const sendgridTransport = require('nodemailer-sendgrid-transport');
+const sgmail = require('@sendgrid/mail');
 
-const transporter = nodemailer.createTransport(sendgridTransport({
-  auth:{
-    api_key: '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'
-  }
-}));
+const apiKey = process.env.SENDGRID_API_KEY;
+sgmail.setApiKey(apiKey);
 
 /************************ LOGGING IN ***********************/
 exports.login =  async (req, res)=>{
   const errors = validationResult(req);
   const error = errors.array();
   if(!errors.isEmpty()){
-    return res.status(422).json({
-      message: 'error in validation',
-      errors : error[0].msg
+    return res.status(403).json({
+      errors: 'error in validation',
+      message : error[0].msg
     });
   }
 
   const user = await User.findOne({email: req.body.email});
   if (!user){
-    return res.status(422).json({message: "invalid mail or password"});
+    return res.status(403).json({message: "invalid mail or password"});
   }
 
   const valid = await bcrypt.compare(req.body.password, user.password);
   if (!valid){
-    return res.status(422).json({message: "invalid mail or password"});
+    return res.status(403).json({message: "invalid mail or password"});
   }
 
   const token = jwt.sign({_id: user._id, role: user.role}, process.env.SECRET_TOKEN,{
@@ -46,8 +42,8 @@ exports.register = async (req, res)=>{
   const error = errors.array();
   if(!errors.isEmpty()){
     return res.status(422).json({
-      message: 'error in validation',
-      errors : error[0].msg
+      errors: 'error in validation',
+      message : error[0].msg
     });
   }
 
@@ -58,7 +54,7 @@ exports.register = async (req, res)=>{
     });
   }
 
-  bcrypt.hash(req.body.password, 12).then(hashedPw=>{
+  const hashedPw = await bcrypt.hash(req.body.password, 12)
     const user = new User({
       email: req.body.email,
       password: hashedPw,
@@ -66,20 +62,17 @@ exports.register = async (req, res)=>{
       role: "user"
     });
 
-    return user.save();
-      }).then(result=>{
-        res.status(200).json({user: result._id});
-        // return transporter.sendMail({
-        //   to: user.email,
-        //   from: 'berlom@solutions.tn',
-        //   subject:'my miserable life',
-        //   text:'your life sucks dude get a real one'
-        // });
-    }).catch(err=>{
-      res.status(500).json({
-        error : err
-      });
-    });
+    await  user.save();
+        
+    const msg = {
+      to: req.body.email, // Change to your recipient
+      from: 'berlom69@gmail.com', // Change to your verified sender
+      subject: 'Ativating Account',
+      html: '<strong>and easy to do anywhere, even with Node.js</strong>',
+    };
+    await sgmail.send(msg);
+    res.status(200).send(user._id);
+      
 }
 
 /************************ ADDING TO WATCHLIST ***********************/
