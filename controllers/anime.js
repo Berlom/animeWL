@@ -26,11 +26,26 @@ exports.getAnimes = async (req, res) => {
 exports.getLimitedAnimes = async (req, res) => {
   try {
     const lim = parseInt(req.params.limit);
+    const start = parseInt(req.params.start);
     const anime = await Anime.find()
       .populate("category", "name")
       .populate("studio", "name")
+      .skip(start)
       .limit(lim);
     res.json(anime);
+  } catch (err) {
+    res.status(500).json({
+      error: err,
+    });
+  }
+};
+
+/************************ GETTING THE ANIME COUNT ***********************/
+exports.getCount = async (req, res) => {
+  try {
+    const count = Anime.count({}, (err, count) => {
+      res.json(count);
+    });
   } catch (err) {
     res.status(500).json({
       error: err,
