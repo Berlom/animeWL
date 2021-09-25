@@ -2,7 +2,6 @@ const express = require("express");
 const router = express.Router();
 const token = require("./verifyToken");
 const admin = require("./verifyAdmin");
-const axios = require("axios");
 
 const animeController = require("../controllers/anime");
 
